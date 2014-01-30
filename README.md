@@ -9,9 +9,7 @@ As an exercise in a field I had little experience with, I decided to tackle auto
 Capabilities:
 
 Combat in several arenas (particularly optimized for Forest, Crossroads, Twilight Strands), including optimal targeting, spellcasting, healing and item pickup. Multiple settings possible to prioritize different objectives, including farming or leveling.
-
 Able to navigate the first three home bases: sell, bank, navigate.
-
 Unexpectedly high reliability rate: got stuck perhaps once every ten minutes, forcing the bot to log out and thereby reset its location.
 
 
