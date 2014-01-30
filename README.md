@@ -3,7 +3,7 @@ PathOfExile
 
 Apr-Jul 2013. Bot for Path Of Exile run via computer vision.
 
-To learn about a field I had little experience with, I decided to tackle automating the play of the Action RPG game, Path of Exile (http://www.pathofexile.com/) using computer vision. I chose to forgo 'injection' methods (altering the binary of the executable) and instead relied purely on screenshots to interact with the game.
+To learn about a field I had little experience with, I decided to tackle automating the play of the Action RPG game, Path of Exile (http://www.pathofexile.com/) using computer vision. I chose to forgo 'injection' methods (altering the binary of the executable) and instead relied purely on screenshots and simulation of mouse and keyboard inputs to interact with the game.
 
 
 Capabilities:
