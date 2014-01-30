@@ -1,0 +1,1 @@
+java -jar -Djava.library.path="src\macro" Main.jar

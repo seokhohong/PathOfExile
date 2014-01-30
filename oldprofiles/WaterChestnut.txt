@@ -1,0 +1,21 @@
+#Version
+5
+angstofangsts4@hotmail.com
+Shadow1!
+#Character selection offset (from 0)
+3
+#Level (deprecated)
+50
+QUICKSILVER, QUICKSILVER, QUICKSILVER, QUICKSILVER, QUICKSILVER
+# + Marks to use
+WRATH+: R,
+FLAME_TOTEM+: M_BUTTON,
+FREEZING_PULSE+: R_BUTTON : 1.0: .55;
+#Class
+SHADOW
+The Twilight Strand2;
+#For Health, lower number is equal to more health
+#Healing
+25
+#Critical
+50

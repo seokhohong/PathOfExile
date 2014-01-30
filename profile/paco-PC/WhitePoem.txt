@@ -1,0 +1,19 @@
+#Version
+7
+WhitePoem118
+whitepoem118@hotmail.com
+'a;,oq123
+#Character selection offset (from 0)
+0
+#Level (deprecated)
+50
+LIFE, LIFE, LIFE, QUICKSILVER, QUICKSILVER
+#Spells
+LIGHTNING_ARROW+: R_BUTTON : 0.7: 0.57,
+POISON_ARROW+: M_BUTTON : 0.3: 0.57;
+RANGER
+The Forest2;
+25
+50
+#FIX
+0

@@ -1,0 +1,24 @@
+#Version
+7
+VioletDream111
+violetdream111@gmail.com
+'a;,oq123
+#Character selection offset (from 0)
+0
+#Level (deprecated)
+50
+LIFE, LIFE, LIFE, QUICKSILVER, QUICKSILVER
+#Spells
+ANGER+: W,
+WRATH+: R,
+LIGHTNING_ARROW+: R_BUTTON : 0.7: 0.32,
+POISON_ARROW+: M_BUTTON : 0.3: 0.41;
+RANGER
+The Forest3;
+#For Health, lower number is equal to more health
+#Healing
+25
+#Critical
+50
+#FIX
+0

@@ -3,12 +3,21 @@ package img;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
-import java.util.Arrays;
 
+/**
+ * 
+ * A bitmap representing each pixel with an int[] of rgb values from 0 to 255
+ * 
+ * Contains generic operations on bitmaps
+ * 
+ * @author Seokho
+ *
+ */
 public class IntBitmap
 {
 	public static final int RGB = 3;
@@ -21,6 +30,23 @@ public class IntBitmap
 		this.data = data;
 		imgWidth = data.length;
 		imgHeight = data[0].length;
+	}
+	//Copy constructor
+	public static IntBitmap copy(IntBitmap img)
+	{
+		int[][][] oldData = img.data;
+		int[][][] newData = new int[img.imgWidth][img.imgHeight][RGB];
+		for(int a = 0; a < img.imgWidth; a++)
+		{
+			for(int b = 0; b < img.imgHeight; b++)
+			{
+				for(int c = 0; c < RGB; c++)
+				{
+					newData[a][b][c] = oldData[a][b][c];
+				}
+			}
+		}
+		return new IntBitmap(newData);
 	}
 	public static IntBitmap getInstance(int[][][] data)
 	{
@@ -63,17 +89,27 @@ public class IntBitmap
 			{
 				for(int c = 0; c < RGB ; c++)
 				{
-					intArr[a][b][c] = (ImageToolkit.MAX_VAL + (int) byteArray[b * imgWidth * RGB + a * RGB + (2 - c)]) % ImageToolkit.MAX_VAL;
+					intArr[a][b][c] = (ImageToolkit.MAX_VAL + byteArray[b * imgWidth * RGB + a * RGB + (2 - c)]) % ImageToolkit.MAX_VAL;
 				}
 			}
 		}
 		return intArr;
 	}
-	//BufferedImage -> int[][][]
-	//Avoids having to expose data as public
-	public static int[][][] ImgtoIntArr(BufferedImage img)
+	
+	public IntBitmap subimage(Rectangle rect)
 	{
-		return getInstance(img).data;
+		int[][][] newData = new int[rect.width][rect.height][RGB];
+		for(int a = 0; a < rect.width && a + rect.x < data.length; a++)
+		{
+			for(int b = 0; b < rect.height && b + rect.y < data[0].length; b++)
+			{
+				for(int c = 0; c < RGB ; c++)
+				{
+					newData[a][b][c] = data[a + rect.x][b + rect.y][c];
+				}
+			}
+		}
+		return new IntBitmap(newData);
 	}
 	
 	/*
@@ -145,99 +181,52 @@ public class IntBitmap
 			}
 		}
 	}
+	
+	
+	//All pixels with a color value above val will be blackened
+	public void highPassByAverage(int val)
+	{
+		for(int a = 0; a < getWidth(); a++)
+		{
+			for(int b = 0; b < getHeight(); b++)
+			{
+				//if above, clamp
+				if((data[a][b][0] + data[a][b][1] + data[a][b][2]) / 3 < val)
+				{
+					data[a][b][0] = 0;
+					data[a][b][1] = 0;
+					data[a][b][2] = 0;
+				}
+			}
+		}
+	}
+	//Values above this amount will be capped
+	public void cap(int red, int green, int blue)
+	{
+		for(int a = 0; a < getWidth(); a++)
+		{
+			for(int b = 0; b < getHeight(); b++)
+			{
+				Math.min(data[a][b][0], red);
+				Math.min(data[a][b][1], green);
+				Math.min(data[a][b][2], blue);
+			}
+		}
+	}
 	public void subtract(IntBitmap img)
 	{
-		int[][][] otherData = img.getData();
+		int[][][] otherData = img.getData(); 
 		for(int a = 0; a < getWidth(); a++)
 		{
 			for(int b = 0; b < getHeight(); b++)
 			{
 				//data[a][b] = minDiffWithNeighbors(otherData, a, b);
-				
 				for(int c = 0; c < RGB; c++)
 				{
 					data[a][b][c] = Math.abs(data[a][b][c] - otherData[a][b][c]);
 				}
 			}
 		}
-	}
-	private int[] minDiffWithNeighbors(int[][][] otherData, int x, int y)
-	{
-		int[] min = new int[RGB];
-		Arrays.fill(min, ImageToolkit.MAX_VAL);
-		for(int a = 0; a < RGB; a++)
-		{
-			if(x > 0) min[a] = Math.min(min[a], Math.abs(data[x][y][a] - otherData[x-1][y][a]));
-			if(x > 0 && y > 0) min[a] = Math.min(min[a], Math.abs(data[x][y][a] - otherData[x-1][y-1][a]));
-			if(x > 0 && y < data[0].length - 1) min[a] = Math.min(min[a], Math.abs(data[x][y][a] - otherData[x-1][y+1][a]));
-			if(x < data.length - 1) min[a] = Math.min(min[a], Math.abs(data[x][y][a] - otherData[x + 1][y][a]));
-			if(x < data.length - 1 && y > 0) min[a] = Math.min(min[a], Math.abs(data[x][y][a] - otherData[x + 1][y - 1][a]));
-			if(x < data.length - 1 && y < data[0].length - 1) min[a] = Math.min(min[a], Math.abs(data[x][y][a] - otherData[x + 1][y + 1][a]));
-			if(y > 0) min[a] = Math.min(min[a], Math.abs(data[x][y][a] - otherData[x][y-1][a]));
-			if(y < data[0].length - 1) min[a] = Math.min(min[a], Math.abs(data[x][y][a] - otherData[x][y + 1][a]));
-		}
-		return min;
-	}
-	public GreyscaleImage negHorizDerivative()
-	{
-		int[][] newData = new int[getWidth()][getHeight()];
-		for(int a = 0; a < getWidth(); a++)
-		{
-			for(int b = 0; b < getHeight(); b++)
-			{
-				int leftDeriv = a>0 ? ImageToolkit.colorDiff(data[a][b], data[a-1][b]) : 0;
-				int rightDeriv = a<getWidth()-1 ? ImageToolkit.colorDiff(data[a][b], data[a+1][b]) : 0;
-				newData[a][b] = ImageToolkit.MAX_VAL - (leftDeriv + rightDeriv);
-			}
-		}
-		return new GreyscaleImage(newData);
-	}
-	private static final int CONTRAST = 3;
-	public GreyscaleImage lineDerivative()
-	{
-		int[][] newData = new int[getWidth()][getHeight()];
-		for(int a = 0; a < getWidth(); a++)
-		{
-			for(int b = 0; b < getHeight(); b++)
-			{
-				int leftDeriv = a > 0 ? ImageToolkit.colorDiff(data[a][b], data[a-1][b]) : 0;
-				int rightDeriv = a < getWidth()-1 ? ImageToolkit.colorDiff(data[a][b], data[a+1][b]) : 0;
-				int upDeriv = b > 0 ? ImageToolkit.colorDiff(data[a][b], data[a][b-1]) : 0;
-				int downDeriv = b < getHeight()-1 ? ImageToolkit.colorDiff(data[a][b], data[a][b+1]) : 0;
-				newData[a][b] = CONTRAST * (upDeriv + downDeriv)/(leftDeriv + rightDeriv + 1); //avoid div by 0
-			}
-		}
-		return new GreyscaleImage(newData);
-	}
-	/**
-	 * 
-	 * Gets whiter value for pixels that have greater contrast with the one above and are similar to the ones below
-	 * Accentuates the top lines of items
-	 * 
-	 */
-	public GreyscaleImage emphasisUpDerivative()
-	{
-		int[][] data = new int[getWidth()][getHeight()];
-		for(int a = 0 ; a < getWidth() ; a++)
-		{
-			for(int b = 0; b < getHeight() ; b++)
-			{		
-				data[a][b] = Math.max(getDelta(a, b, 0, -1) - getDelta(a, b, 0, 1), 0);  //can't go negative
-			}
-		}
-		return new GreyscaleImage(data);
-	}
-	public GreyscaleImage emphasisDownDerivative()
-	{
-		int[][] data = new int[getWidth()][getHeight()];
-		for(int a = 0 ; a < getWidth() ; a++)
-		{
-			for(int b = 0; b < getHeight() ; b++)
-			{
-				data[a][b] = Math.max(getDelta(a, b, 0, 1) - getDelta(a, b, 0, -1), 0);  //can't go negative
-			}
-		}
-		return new GreyscaleImage(data);
 	}
 	public GreyscaleImage bidirectionalDerivative()
 	{
@@ -247,52 +236,6 @@ public class IntBitmap
 			for(int b = 0; b < getHeight() ; b++)
 			{
 				data[a][b] = (getDelta(a, b, 0, 1) + getDelta(a, b, 1, 0)) / 2;
-			}
-		}
-		return new GreyscaleImage(data);
-	}
-	public GreyscaleImage fourdirectionalDerivative()
-	{
-		int[][] data = new int[getWidth()][getHeight()];
-		for(int a = 0 ; a < getWidth() ; a++)
-		{
-			for(int b = 0; b < getHeight() ; b++)
-			{
-				data[a][b] = (getDelta(a, b, -1, 0) + 
-							getDelta(a, b, 0, -1) + 
-							getDelta(a, b, 0, 1) + 
-							getDelta(a, b, 1, 0)) / 4;
-			}
-		}
-		return new GreyscaleImage(data);
-	}
-	public GreyscaleImage omnidirectionalDerivative()
-	{
-		int[][] data = new int[getWidth()][getHeight()];
-		for(int a = 0 ; a < getWidth() ; a++)
-		{
-			for(int b = 0; b < getHeight() ; b++)
-			{
-				data[a][b] = (getDelta(a, b, -1, -1) + 
-						getDelta(a, b, -1, 0) + 
-						getDelta(a, b, -1, 1) + 
-						getDelta(a, b, 0, -1) + 
-						getDelta(a, b, 0, 1) + 
-						getDelta(a, b, 1, -1) + 
-						getDelta(a, b, 1, 0) + 
-						getDelta(a, b, 1, 1)) / 8;
-			}
-		}
-		return new GreyscaleImage(data);
-	}
-	public GreyscaleImage verticalDerivative()
-	{
-		int[][] data = new int[getWidth()][getHeight()];
-		for(int a = 0 ; a < getWidth() ; a++)
-		{
-			for(int b = 0; b < getHeight() ; b++)
-			{
-				data[a][b] = getDelta(a, b, 0, 1);
 			}
 		}
 		return new GreyscaleImage(data);
@@ -318,32 +261,102 @@ public class IntBitmap
 		}
 		return new GreyscaleImage(data);
 	}
-	private static final int COLOR_THRESHOLD = 10;
+	public BinaryImage doubleCutoff(int cutoff)
+	{
+		boolean[][] data = new boolean[getWidth()][getHeight()];
+		for(int a = 0 ; a < getWidth() ; a++)
+		{
+			for(int b = 0; b < getHeight() ; b++)
+			{
+				data[a][b] = (this.data[a][b][0] + this.data[a][b][1] + this.data[a][b][2]) / 3 > cutoff;
+			}
+		}
+		return new BinaryImage(data);
+	}
+	//Returns whether data and iconData have matching information given the a, b offset in data
+	private boolean foundMatch(int[][][] data, int[][][] iconData, int a, int b, int threshold)
+	{
+		boolean valid = true;
+		for(int c = 0; c < iconData.length; c++)
+		{
+			for(int d = 0; d < iconData[0].length; d++)
+			{
+				if(c+a < data.length && d+b < data[0].length)
+				{
+					if(ImageToolkit.colorDiff(data[c + a][d + b], iconData[c][d]) > threshold)
+					{
+						valid = false; break;
+					}
+				}
+				else
+				{
+					valid = false; break;
+				}
+				
+			}
+		}
+		return valid;
+	}
+	/**
+	 * 
+	 * Dumbest matching function ever
+	 * 
+	 * @param icon
+	 * @return
+	 */
+	private static final int DEFAULT_THRESHOLD = 10;
 	public Point findImage(IntBitmap icon)
+	{
+		return findImage(icon, DEFAULT_THRESHOLD);
+	}
+	public Point findImage(IntBitmap icon, int threshold)
 	{
 		for(int a = 0; a < getWidth(); a++)
 		{
 			for(int b = 0; b < getHeight(); b++)
 			{
-				if(ImageToolkit.colorDiff(data[a][b], icon.data[0][0]) < COLOR_THRESHOLD)
+				if(ImageToolkit.colorDiff(data[a][b], icon.data[0][0]) < threshold)
 				{
-					boolean valid = true;
-					for(int c = 0; c < icon.getWidth(); c++)
+					if(foundMatch(data, icon.data, a, b, threshold)) return new Point(a, b);
+				}
+			}
+		}
+		return null;
+	}
+	private boolean foundItemMatch(int[][][] data, int[][][] iconData, int a, int b, double selectivityRatio)
+	{
+		double trueCount = 0;
+		for(int c = 0; c < iconData.length; c++)
+		{
+			for(int d = 0; d < iconData[0].length; d++)
+			{
+				if(c+a < data.length && d+b < data[0].length)
+				{
+					if(ImageToolkit.colorDiff(data[c + a][d + b], iconData[c][d]) < 60)
 					{
-						for(int d = 0; d < icon.getHeight(); d++)
-						{
-							if(c+a < data.length && d+b < data[0].length 
-									&& ImageToolkit.colorDiff(data[c + a][d + b], icon.data[c][d]) > COLOR_THRESHOLD)
-							{
-								valid = false;
-								break;
-							}
-						}
+						trueCount++;
+						//System.out.println("Got one.");
 					}
-					if(valid)
-					{
-						return new Point(a, b);
-					}
+				}
+			}
+		}
+		//System.out.println("We got here");
+		//System.out.println((double)trueCount/((double)iconData.length * (double)iconData[0].length));
+		if(trueCount/((double)iconData.length * (double)iconData[0].length) >= selectivityRatio)
+		{
+			return true;
+		}
+		return false;
+	}
+	public Point findItemImage(IntBitmap icon, double selectivityRatio)
+	{
+		for(int a = 0; a < getWidth(); a++)
+		{
+			for(int b = 0; b < getHeight(); b++)
+			{
+				if(ImageToolkit.colorDiff(data[a][b], icon.data[0][0]) < 40)
+				{
+					if(foundItemMatch(data, icon.data, a, b, selectivityRatio)) return new Point(a, b);
 				}
 			}
 		}
@@ -352,39 +365,28 @@ public class IntBitmap
 	//Returns the points at which icon was found on the screen
 	public ArrayList<Point> findImages(IntBitmap icon)
 	{
+		return findImages(icon, DEFAULT_THRESHOLD);
+	}
+	//Returns the points at which icon was found on the screen
+	public ArrayList<Point> findImages(IntBitmap icon, int threshold)
+	{
 		ArrayList<Point> points = new ArrayList<Point>();
 		for(int a = 0; a < getWidth(); a++)
 		{
 			for(int b = 0; b < getHeight(); b++)
 			{
-				if(ImageToolkit.colorDiff(data[a][b], icon.data[0][0]) < COLOR_THRESHOLD)
+				if(ImageToolkit.colorDiff(data[a][b], icon.data[0][0]) < threshold)
 				{
-					boolean valid = true;
-					for(int c = 0; c < icon.getWidth(); c++)
-					{
-						for(int d = 0; d < icon.getHeight(); d++)
-						{
-							if(c+a < data.length && d+b < data[0].length 
-									&& ImageToolkit.colorDiff(data[c + a][d + b], icon.data[c][d]) > COLOR_THRESHOLD)
-							{
-								valid = false;
-								break;
-							}
-						}
-					}
-					if(valid)
-					{
-						points.add(new Point(a, b));
-					}
+					if(foundMatch(data, icon.data, a, b, threshold)) points.add(new Point(a, b));
 				}
 			}
 		}
 		return points;
 	}
-	public void export(String filename)
+	public BufferedImage toBufferedImage()
 	{
-		BufferedImage toExport = new BufferedImage(data.length, data[0].length, BufferedImage.TYPE_INT_RGB);
-		Graphics g = toExport.createGraphics();
+		BufferedImage buff = new BufferedImage(data.length, data[0].length, BufferedImage.TYPE_INT_RGB);
+		Graphics g = buff.createGraphics();
 		for(int a = 0; a < data.length; a++)
 		{
 			for(int b = 0; b < data[0].length; b++)
@@ -393,7 +395,12 @@ public class IntBitmap
 				g.drawLine(a, b, a, b);
 			}
 		}
-		ImageToolkit.exportImage(toExport, filename);
+		g.dispose();
+		return buff;
+	}
+	public void export(String filename)
+	{
+		ImageToolkit.exportImage(toBufferedImage(), filename);
 	}
 	public int getRed(int x, int y) { return data[x][y][0]; }		
 	public int getGreen(int x, int y) { return data[x][y][1]; }
@@ -437,4 +444,170 @@ public class IntBitmap
 			}
 		}
 	}
+	
+	public void isolate(Color rgb)
+	{
+		for(int a = 0; a < getWidth(); a++)
+		{
+			for(int b = 0; b < getHeight(); b++)
+			{
+				if(rgb == Color.red)
+				{
+					setGreen(a, b, 0);
+					setBlue(a, b, 0);
+				}
+				else if(rgb == Color.green)
+				{
+					setRed(a, b, 0);
+					setBlue(a, b, 0);
+				}
+				else if(rgb == Color.blue)
+				{
+					setRed(a, b, 0);
+					setGreen(a, b, 0);
+				}
+			}
+		}
+	}
+	public double averageColor(Color rgb)
+	{
+		double result = 0;
+		for(int a = 0; a < getWidth(); a++)
+		{
+			for(int b = 0; b < getHeight(); b++)
+			{
+				if(rgb == Color.red)
+				{
+					result = result + getRed(a, b);
+				}
+				else if(rgb == Color.green)
+				{
+					result = result + getGreen(a, b);
+				}
+				else if(rgb == Color.blue)
+				{
+					result = result + getBlue(a, b);
+				}
+			}
+		}
+		return result/(getWidth()*getHeight());
+	}
+	private void blackPixel(Point p)
+	{
+		setRed(p.x, p.y, 0);
+		setGreen(p.x, p.y, 0);
+		setBlue(p.x, p.y, 0);
+	}
+	
+	public void blackRectangle(Rectangle r)
+	{
+		for(int a = r.x; a < r.x + r.width; a++)
+		{
+			for(int b = r.y; b < r.y + r.height; b++)
+			{
+				blackPixel(new Point(a, b));
+			}
+		}
+	}
+	
+	public String averageSetToString()
+	{
+		double r = averageColor(Color.red);
+		double g = averageColor(Color.green);
+		double b = averageColor(Color.blue);
+		//double z = toGreyscale().averageIntensity(); //can be obtained just by averaging r,g,b -- thus no new information
+		return new String(r + ", " + g + ", " + b);
+	}
+	public double matchError(IntBitmap icon)
+	{		
+		//this.blackRectangle(new Rectangle(0, 0, 13, 10));
+		//icon.blackRectangle(new Rectangle(0, 0, 13, 10));
+		
+		double r1 = this.averageColor(Color.red);
+		double g1 = this.averageColor(Color.green);
+		double b1 = this.averageColor(Color.blue);
+		
+		double r2 = icon.averageColor(Color.red);
+		double g2 = icon.averageColor(Color.green);
+		double b2 = icon.averageColor(Color.blue);
+		
+		double dr = Math.abs(r1 - r2);
+		double dg = Math.abs(g1 - g2);
+		double db = Math.abs(b1 - b2);
+
+		ArrayList<Double> brightErrors = this.getBrightnessErrors(icon);
+		double brightnessError = 0;
+		for(int i = 0; i < 10; i++)
+		{
+			brightnessError = brightnessError + brightErrors.get(i)*brightErrors.get(i);
+		}
+		return dr*dr + dg*dg + db*db + brightnessError*brightnessError;
+	}
+	
+	private ArrayList<Double> getBrightnessErrors(IntBitmap icon)
+	{
+		final int INCREMENT = 50;
+		ArrayList<Double> errors = new ArrayList<Double>();
+		//icon.blackRectangle(new Rectangle(0, 0, 13, 10));
+		//this.blackRectangle(new Rectangle(0, 0, 13, 10));
+		
+		for(int i = 1; i <= 5; i++)
+		{
+			errors.add(Math.abs(icon.brightContent(INCREMENT * i) - this.brightContent(INCREMENT * i)));
+		}
+		for(int i = 1; i <= 5; i++)
+		{
+			errors.add(Math.abs(icon.darkContent(INCREMENT * i) - this.darkContent(INCREMENT * i)));
+		}
+		return errors;
+		
+	}
+	public double brightContent(int cutoff)
+	{
+		GreyscaleImage grey = this.toGreyscale();
+		grey.highPass(cutoff);
+		return grey.averageIntensity();
+	}
+	public double darkContent(int cutoff)
+	{
+		GreyscaleImage grey = this.toGreyscale();
+		grey.lowPass(cutoff);
+		return grey.averageIntensity();
+	}
+	
+	
+	private static final double MATCH_ERROR_THRESHOLD = 7;
+	public boolean isMatch(IntBitmap icon)
+	{
+		double error = this.matchError(icon);
+		if(error <= MATCH_ERROR_THRESHOLD)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * Changes this image to an IntBitmap of width / dim x height / dim dimensions
+	 * 
+	 * Each dim x dim square in the original will be replaced with the top-left pixel
+	 * 
+	 * @param dim
+	 */
+	public void sample(int dim)
+	{
+		int[][][] sampled = new int[imgWidth / dim][imgHeight / dim][RGB];
+		for(int a = 0; a < imgWidth / dim; a++)
+		{
+			for(int b = 0; b < imgHeight / dim; b++)
+			{
+				sampled[a][b] = data[a * dim][b * dim];
+			}
+		}
+		imgWidth /= dim;
+		imgHeight /= dim;
+		data = sampled;
+	}
+	
 }

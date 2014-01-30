@@ -3,6 +3,7 @@ package img;
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
@@ -11,8 +12,17 @@ import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+
 import javax.imageio.ImageIO;
 
+/**
+ * 
+ * A collection of static methods making it more convenient to deal with images, particularly with image files
+ * 
+ * @author Seokho
+ *
+ */
 public class ImageToolkit 
 {
 	private static Robot robot;
@@ -38,14 +48,19 @@ public class ImageToolkit
 			return null;
 		}
 	}
+	public static BufferedImage takeScreenshot(Rectangle screenRect)
+	{
+		return robot.createScreenCapture(screenRect);
+	}
 	public static BufferedImage takeScreenshot()
 	{
 		return robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
 	}
 	//Deep copies to produce a new copy of the area (this isn't cheap)
+	//IntBitmap probably is cheaper?
 	public static BufferedImage getSubimage(BufferedImage orig, Rectangle rect)
 	{
-		int[][][] origData = IntBitmap.ImgtoIntArr(orig);
+		int[][][] origData = IntBitmap.getInstance(orig).getData();
 		BufferedImage sub = new BufferedImage(rect.width, rect.height, BufferedImage.TYPE_3BYTE_BGR);
 		Graphics g = sub.createGraphics();
 		for(int a = rect.x; a < rect.x + rect.width; a++)
@@ -86,70 +101,98 @@ public class ImageToolkit
 	{
 		return Math.abs(one[0] - two[0]) + Math.abs(one[1] - two[1]) + Math.abs(one[2] - two[2]);
 	}
-	public static IntBitmap splice(IntBitmap original, IntBitmap toAdd, int xOffset, int yOffset)
+	public static IntBitmap splice(IntBitmap base, IntBitmap toAdd, int xOffset, int yOffset)
 	{
-		int[][][] origData = original.getData();
+		int[][][] baseData = base.getData();
 		int[][][] toAddData = toAdd.getData();
-		//new dimensions
-		int[][][] combined = new int[xOffset + toAdd.getWidth()][yOffset + toAdd.getHeight()][];
-		int origWidth = original.getWidth();
-		int origHeight = original.getHeight();
-		int toAddWidth = toAdd.getWidth();
-		int toAddHeight = toAdd.getHeight();
-		for(int a = 0; a < xOffset + toAddWidth; a++)
+		int combinedWidth = Math.max(base.getWidth() + Math.max(-xOffset, 0), toAdd.getWidth() + Math.max(xOffset, 0));
+		int combinedHeight = Math.max(base.getHeight() + Math.max(-yOffset, 0), toAdd.getHeight() + Math.max(yOffset, 0));
+		int[][][] combined = new int[combinedWidth][combinedHeight][IntBitmap.RGB];
+		for(int a = 0; a < base.getWidth(); a ++)
 		{
-			for(int b = 0; b < yOffset + toAddHeight; b++)
+			for(int b = 0; b < base.getHeight(); b++)
 			{
-				if(a - xOffset > 0 && b - yOffset > 0) //if the second image has the right pixels
+				for(int c = 0; c < IntBitmap.RGB; c++)
 				{
-					combined[a][b] = toAddData[a - xOffset][b - yOffset];
+					combined[a + Math.max(-xOffset, 0)][b + Math.max(-yOffset, 0)][c] = baseData[a][b][c];
 				}
-				else if(a < origWidth && b < origHeight) //else the first fills in
+			}
+		}
+		for(int a = 0; a < toAdd.getWidth(); a ++)
+		{
+			for(int b = 0; b < toAdd.getHeight(); b++)
+			{
+				for(int c = 0; c < IntBitmap.RGB; c++)
 				{
-					combined[a][b] = origData[a][b];
-				}
-				else //the corners
-				{
-					combined[a][b] = blackPixel();
+					combined[a + Math.max(xOffset, 0)][b + Math.max(yOffset, 0)][c] = toAddData[a][b][c];
 				}
 			}
 		}
 		return IntBitmap.getInstance(combined);
 	}
-	public static GreyscaleImage splice(GreyscaleImage original, GreyscaleImage toAdd, int xOffset, int yOffset)
+	public static GreyscaleImage splice(GreyscaleImage base, GreyscaleImage toAdd, int xOffset, int yOffset)
 	{
-		int[][] origData = original.getData();
+		int[][] baseData = base.getData();
 		int[][] toAddData = toAdd.getData();
-		int[][] combined = new int[xOffset + toAdd.getWidth()][yOffset + toAdd.getHeight()];
-		int origWidth = original.getWidth();
-		int origHeight = original.getHeight();
-		int toAddWidth = toAdd.getWidth();
-		int toAddHeight = toAdd.getHeight();
-		for(int a = 0; a < xOffset + toAddWidth; a++)
+		int[][] combined = new int[Math.min(base.getWidth(), toAdd.getWidth()) + Math.abs(xOffset)]
+											[Math.min(base.getHeight(), toAdd.getHeight()) + Math.abs(yOffset)];
+		for(int a = 0; a < base.getWidth(); a ++)
 		{
-			for(int b = 0; b < yOffset + toAddHeight; b++)
+			for(int b = 0; b < base.getHeight(); b++)
 			{
-				if(a - xOffset > 0 && b - yOffset > 0) //if the second image has the right pixels
-				{
-					combined[a][b] = toAddData[a - xOffset][b - yOffset];
-				}
-				else if(a < origWidth && b < origHeight) //else the first fills in
-				{
-					combined[a][b] = origData[a][b];
-				}
-				else //the corners
-				{
-					combined[a][b] = 0;
-				}
+				combined[a + Math.max(-xOffset, 0)][b + Math.max(-yOffset, 0)] = baseData[a][b];
+			}
+		}
+		for(int a = 0; a < toAdd.getWidth(); a ++)
+		{
+			for(int b = 0; b < toAdd.getHeight(); b++)
+			{
+				combined[a + Math.max(xOffset, 0)][b + Math.max(yOffset, 0)] = toAddData[a][b];
 			}
 		}
 		return new GreyscaleImage(combined);
 	}
-
-	//returns an array of 0, 0, 0
-	private static int[] blackPixel()
+	//offset is from base's top left corner
+	public static BinaryImage splice(BinaryImage base, BinaryImage toAdd, int xOffset, int yOffset)
 	{
-		int[] black = {0, 0, 0};
-		return black;
+		boolean[][] baseData = base.getData();
+		boolean[][] toAddData = toAdd.getData();
+		boolean[][] combined = new boolean[Math.max(base.getWidth(), toAdd.getWidth()) + Math.abs(xOffset)]
+											[Math.max(base.getHeight(), toAdd.getHeight()) + Math.abs(yOffset)];
+		for(int a = 0; a < base.getWidth(); a ++)
+		{
+			for(int b = 0; b < base.getHeight(); b++)
+			{
+				combined[a + Math.max(-xOffset, 0)][b + Math.max(-yOffset, 0)] = baseData[a][b];
+			}
+		}
+		for(int a = 0; a < toAdd.getWidth(); a ++)
+		{
+			for(int b = 0; b < toAdd.getHeight(); b++)
+			{
+				combined[a + Math.max(xOffset, 0)][b + Math.max(yOffset, 0)] = toAddData[a][b];
+			}
+		}
+		return new BinaryImage(combined);
 	}
+	
+	public static void ratioTool(IntBitmap image, ArrayList<Point> points)
+	{
+		double red;
+		double green;
+		double blue;
+		double RG;
+		double GB;
+		for(int a = 0; a < points.size(); a++)
+		{
+			red = image.getRed(points.get(a).x, points.get(a).y);
+			green = image.getGreen(points.get(a).x, points.get(a).y);
+			blue = image.getBlue(points.get(a).x, points.get(a).y);
+			RG = red/green;
+			GB = green/blue;
+			//System.out.println(RG + ", " + GB);
+			System.out.println(red + ", " + green + ", " + blue);
+		}
+	}
+	
 }

@@ -1,0 +1,14 @@
+1
+pacothepi@hotmail.com
+Shadow1!
+MARAUDER
+#Third character on list (0 offset)
+2
+#Level
+50
+LIFE, LIFE, LIFE, LIFE, LIFE
+CLEAVE: L_BUTTON,
+SHIELD_CHARGE: M_BUTTON,
+HEAVY_STRIKE: R_BUTTON,
+MOLTEN_SHIELD: E;
+The Twilight Strand3;

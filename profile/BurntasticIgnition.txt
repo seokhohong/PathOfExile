@@ -1,0 +1,24 @@
+#Version
+7
+BurntasticIgnition
+angstofangsts4@hotmail.com
+Shadow1!
+#Character Number on list (0 offset)
+0
+#Level (deprecated)
+50
+#Potions
+LIFE, HYBRID, QUICKSILVER, MANA, HYBRID
+# + Marks to use
+# Move : MouseKey : Frequency of use : Cooldown
+ICE_NOVA+ : M_BUTTON : 1.0 : 0.84,
+ENDURING_CRY+ : Q : 0.0 : 0.45,
+ENDURING_CRY+ : W : 0.0 : 0.45,
+DISCHARGE+ : E : 0.0 : 0.9;
+#Class
+DISCHARGER
+The Forest2;
+25
+50
+#FIX
+0

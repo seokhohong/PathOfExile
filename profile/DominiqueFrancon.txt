@@ -1,0 +1,17 @@
+#Version
+7
+Dominique_Francon
+dominiquefrancon647@hotmail.com
+yossarian647
+#Character selection offset (from 0)
+0
+#Level (deprecated)
+50
+LIFE, LIFE, LIFE, QUICKSILVER, QUICKSILVER
+LIGHTNING_ARROW+: R_BUTTON : 0.7: 0.51,
+POISON_ARROW+: M_BUTTON: 0.3: 0.51;
+RANGER
+The Forest3;
+20
+50
+165

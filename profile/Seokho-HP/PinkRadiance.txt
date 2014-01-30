@@ -1,0 +1,19 @@
+#Version
+7
+PinkRadiance
+pinkradiance116@hotmail.com
+'a;,oq123
+#Character selection offset (from 0)
+0
+#Level (deprecated)
+50
+LIFE, LIFE, LIFE, QUICKSILVER, QUICKSILVER
+HASTE+: R : 0.0: 1.1,
+PURITY+: T : 0.0: 1.2,
+FLAME_TOTEM+: M_BUTTON : 0.0 : 1.0,
+POISON_ARROW+: R_BUTTON : 1.0: 0.45;
+RANGER
+The Twilight Strand Solo2;
+20
+50
+175

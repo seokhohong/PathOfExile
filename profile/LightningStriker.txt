@@ -1,0 +1,23 @@
+#Version
+7
+LightningStriker
+angstofangsts1@hotmail.com
+Shadow1!
+#Second character on list (0 offset)
+1
+#Level (deprecated)
+50
+#Potions
+LIFE, LIFE, LIFE, LIFE, LIFE
+# + Marks to use
+# Move : MouseKey : Frequency of use : Cooldown
+LIGHTNING_ARROW+: R_BUTTON : 0.7: 0.53,
+POISON_ARROW+: M_BUTTON : 0.3: 0.53,
+WRATH+: R;
+#Class
+RANGER
+The Forest3;
+25
+50
+#FIX
+0

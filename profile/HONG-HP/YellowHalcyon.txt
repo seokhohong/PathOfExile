@@ -1,0 +1,22 @@
+#Version
+7
+YellowHalcyon113
+halcyondays113@hotmail.com
+'a;,oq123
+#Character selection offset (from 0)
+0
+#Level (deprecated)
+50
+LIFE, LIFE, LIFE, LIFE, QUICKSILVER
+HASTE+: T : 0.0: 1.1,
+PURITY+: R : 0.0: 1.2,
+PORTAL+: M_BUTTON: 0.0 : 2.2,
+EXPLOSIVE_TOTEM+: R_BUTTON : 0.0 : 1.0;
+RANGER
+Crossroads1;
+#For Health, lower number is equal to more health
+#Healing
+20
+#Critical
+50
+175

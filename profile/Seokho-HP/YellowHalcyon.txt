@@ -1,0 +1,24 @@
+#Version
+7
+YellowHalcyon113
+halcyondays113@hotmail.com
+'a;,oq123
+#Character selection offset (from 0)
+0
+#Level (deprecated)
+50
+LIFE, LIFE, LIFE, QUICKSILVER, QUICKSILVER
+POISON_ARROW+: R_BUTTON : 1.0: 0.42,
+FLAME_TOTEM+: M_BUTTON : 0.0 : 1.0,
+DECOY_TOTEM+: Q : 0.0 : 1.0,
+PORTAL+: T : 0.0: 2.8,
+PURITY+: E : 0.0 : 1.3,
+WRATH+: R : 0.0 : 1.3;
+RANGER
+The Twilight Strand Solo2;
+#For Health, lower number is equal to more health
+#Healing
+20
+#Critical
+50
+175

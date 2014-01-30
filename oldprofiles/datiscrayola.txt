@@ -1,0 +1,12 @@
+#Version
+4
+angstofangsts5@hotmail.com
+Shadow1!
+#Character selection offset (from 0)
+0
+#Level (deprecated)
+50
+LIFE, LIFE, LIFE, MANA, MANA
+LIGHTNING_ARROW+: R_BUTTON : 1.0: 0.64;
+RANGER
+The Forest1;

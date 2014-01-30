@@ -1,0 +1,19 @@
+#Version
+7
+howardRoark_Architect
+howardroark647@hotmail.com
+yossarian647
+#Character selection offset (from 0)
+0
+#Level (deprecated)
+50
+LIFE, LIFE, LIFE, LIFE, QUICKSILVER
+HASTE+: T : 0.0: 1.1,
+PURITY+: R : 0.0: 1.2,
+PORTAL+: M_BUTTON: 0.0 : 2.2,
+EXPLOSIVE_TOTEM+: R_BUTTON : 0.0 : 1.0;
+RANGER
+Crossroads1;
+20
+50
+165

@@ -1,0 +1,12 @@
+#Version
+4
+angstofangsts3@hotmail.com
+Shadow1!
+#Character selection offset (from 0)
+3
+#Level (deprecated)
+50
+LIFE, LIFE, LIFE, LIFE, MANA
+FREEZING_PULSE+: R_BUTTON : 1.0: 0.49;
+SHADOW
+The Forest3;

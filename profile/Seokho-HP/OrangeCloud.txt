@@ -1,0 +1,21 @@
+#Version
+7
+CloudOrange
+orangecloud112@hotmail.com
+'a;,oq123
+#Character selection offset (from 0)
+0
+#Level (deprecated)
+50
+LIFE, LIFE, LIFE, QUICKSILVER, QUICKSILVER
+PURITY+: R : 0.0 : 1.2,
+HASTE+: T : 0.0 : 0.95,
+PORTAL+: Q : 0.0 : 3.0,
+DECOY_TOTEM+ : W : 0.0 : 1.0,
+POISON_ARROW+: R_BUTTON : 1.0 : 0.4,
+FLAME_TOTEM+: M_BUTTON : 0.0 : 1.0;
+RANGER
+The Twilight Strand Solo2;
+25
+50
+175
